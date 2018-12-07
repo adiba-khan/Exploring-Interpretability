@@ -1,8 +1,7 @@
-#import libraries as indicated by MIMIC readmits and LIME tutorials
+#import libraries
 import os
 import xgboost as xgb
 from xgboost.sklearn import XGBClassifier
-from xgboost import plot_importance
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
@@ -20,10 +19,11 @@ import lime.lime_tabular
 from __future__ import print_function
 np.random.seed(1)
 
-#remove columns as noted in MIMIC_III, but we will use OHE codez from LIME
+#remove columns as noted in readmissions tutorial, but we will use OHE code from LIME
 MICU_admits_clean = pd.read_csv('MICU_admits_clean.csv')
 MICU_processed = MICU_admits_clean.drop(['subject_id','hadm_id','admittime','dischtime','first_careunit','last_careunit','readmit_dt','readmit_last_careunit', 'next_readmit_dt'], axis = 1)
 
+#change pandas data frame to numpy array
 data = MICU_processed.values
 
 #encode categorical features
@@ -62,7 +62,6 @@ encoded_train = encoder.transform(train)
 import xgboost
 gbtree = xgboost.XGBClassifier(n_estimators=300, max_depth=5)
 gbtree.fit(encoded_train, labels_train)
-#LIME code that generates same info as [44] -ADIBA
 
 sklearn.metrics.accuracy_score(labels_test, gbtree.predict(encoder.transform(test)))
 
@@ -72,7 +71,13 @@ explainer = lime.lime_tabular.LimeTabularExplainer(train ,feature_names = featur
                                                    categorical_features=categorical_features,
                                                    categorical_names=categorical_names, kernel_width=3)
 
-#run examples
+#need to generate evaluation metrics for project: run time, algorithmic complexity
+#can we generate other graphs besides visuals below?
+
+#---------------------------------------------------------
+#Run examples for visual predictor in Jupyter notebooks
+#---------------------------------------------------------
+
 np.random.seed(1)
 i = 49
 exp = explainer.explain_instance(test[i], predict_fn, num_features=5)
